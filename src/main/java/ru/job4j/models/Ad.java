@@ -15,6 +15,7 @@ public class Ad {
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
     private boolean isActive;
+    private boolean photo;
     @ManyToOne
     @JoinColumn(name = "brand_id", foreignKey = @ForeignKey(name = "BRAND_ID_FK"))
     private Brand brand;
@@ -25,12 +26,13 @@ public class Ad {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "USER_ID_FK"))
     private User user;
 
-    public static Ad of(String name, String description, Brand brand, Body body, User user) {
+    public static Ad of(String name, String description, boolean photo, Brand brand, Body body, User user) {
         Ad ad = new Ad();
         ad.name = name;
         ad.description = description;
         ad.created = new Date(System.currentTimeMillis());
         ad.isActive = true;
+        ad.photo = photo;
         ad.brand = brand;
         ad.body = body;
         ad.user = user;
@@ -101,6 +103,14 @@ public class Ad {
         this.user = user;
     }
 
+    public boolean isPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(boolean photo) {
+        this.photo = photo;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -116,5 +126,20 @@ public class Ad {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
+    }
+
+    @Override
+    public String toString() {
+        return "Ad{"
+                + "id=" + id
+                + ", name='" + name + '\''
+                + ", description='" + description + '\''
+                + ", created=" + created
+                + ", isActive=" + isActive
+                + ", photo=" + photo
+                + ", brand=" + brand
+                + ", body=" + body
+                + ", user=" + user
+                + '}';
     }
 }
