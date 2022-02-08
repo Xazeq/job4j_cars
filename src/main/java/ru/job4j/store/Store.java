@@ -1,11 +1,11 @@
 package ru.job4j.store;
 
-import ru.job4j.models.Ad;
+import org.hibernate.Session;
 
-import java.util.List;
+import java.util.Properties;
+import java.util.function.Function;
 
-public interface Store {
-    List<Ad> findLastDayAds();
-    List<Ad> findAdsWithPhoto();
-    List<Ad> findAdsByBrand(String brandName);
+public interface Store extends AutoCloseable {
+    <T> T tx(final Function<Session, T> command);
+    Properties getAppCfg();
 }

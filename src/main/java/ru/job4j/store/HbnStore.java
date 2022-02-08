@@ -6,12 +6,11 @@ import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import ru.job4j.models.Ad;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.function.Function;
 
 public class HbnStore implements Store {
@@ -19,8 +18,16 @@ public class HbnStore implements Store {
             .configure().build();
     private final SessionFactory sf = new MetadataSources(registry)
             .buildMetadata().buildSessionFactory();
+    private final Properties appCfg = new Properties();
+    private static final Logger LOG = LoggerFactory.getLogger(HbnStore.class.getName());
 
     private HbnStore() {
+        try (InputStream in = HbnStore.class.getClassLoader()
+                .getResourceAsStream("app.properties")) {
+            appCfg.load(in);
+        } catch (Exception e) {
+            LOG.error("Exception in HbnStore constructor", e);
+        }
     }
 
     private static final class Lazy {
@@ -31,7 +38,7 @@ public class HbnStore implements Store {
         return Lazy.INST;
     }
 
-    private <T> T tx(final Function<Session, T> command) {
+    public <T> T tx(final Function<Session, T> command) {
         final Session session = sf.openSession();
         final Transaction tx = session.beginTransaction();
         try {
@@ -47,23 +54,12 @@ public class HbnStore implements Store {
     }
 
     @Override
-    public List<Ad> findLastDayAds() {
-        Date date = Date.from(LocalDateTime.now().minusDays(1).atZone(ZoneId.systemDefault()).toInstant());
-        return this.tx(session ->
-            session.createQuery("from Ad where created between :date and current_timestamp ")
-                    .setParameter("date", date)
-                    .list());
+    public Properties getAppCfg() {
+        return appCfg;
     }
 
     @Override
-    public List<Ad> findAdsWithPhoto() {
-        return this.tx(session -> session.createQuery("from Ad where photo = true").list());
-    }
-
-    @Override
-    public List<Ad> findAdsByBrand(String brandName) {
-        return this.tx(session -> session.createQuery("from Ad where brand.name = :brand")
-                .setParameter("brand", brandName)
-                .list());
+    public void close() throws Exception {
+        StandardServiceRegistryBuilder.destroy(registry);
     }
 }

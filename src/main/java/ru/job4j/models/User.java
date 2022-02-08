@@ -12,14 +12,12 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private String phone;
 
-    public static User of(String username, String password, String email, String phone) {
+    public static User of(String username, String password, String email) {
         User user = new User();
         user.username = username;
         user.password = password;
         user.email = email;
-        user.phone = phone;
         return user;
     }
 
@@ -53,14 +51,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     @Override
